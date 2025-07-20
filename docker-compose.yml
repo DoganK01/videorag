@@ -1,0 +1,49 @@
+# VideoRAG/docker-compose.yml
+# Sunduğunuz şablonu ve projenizin yapısını temel alan son dosya.
+
+services:
+  # Sürekli çalışacak olan API servisi
+  api:
+    build:
+      # Build context'i proje kök dizinidir.
+      context: .
+      dockerfile: Dockerfile
+      # HEDEF: Dockerfile içindeki 'api' adlı son aşamayı oluştur.
+      target: api
+    container_name: videorag_api
+    env_file: .env # .env dosyasını yükle
+    ports:
+      # Ana makinenin 8000 portunu konteynerin 8000 portuna bağla.
+      - "8000:8000"
+    volumes:
+      # Paylaşılan depolama alanı. Konteyner içinde /data/shared olarak görünecek.
+      - shared_storage:/data/shared
+    restart: unless-stopped
+    networks:
+      - videorag_net # Tüm servislerin iletişim kurabilmesi için ortak bir ağ
+
+  # Tek seferlik çalışacak olan Indexer servisi
+  indexer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      # HEDEF: Dockerfile içindeki 'indexer' adlı son aşamayı oluştur.
+      target: indexer
+    container_name: videorag_indexer
+    env_file: .env
+    volumes:
+      # Ana makinedeki source_videos klasörünü konteynerin içine bağla.
+      - ./source_videos:/data/source_videos
+      - shared_storage:/data/shared
+    # Indexer, API'ye bağlı olmadığı için depends_on'a gerek yok.
+    networks:
+      - videorag_net
+
+# Docker'ın yöneteceği isimlendirilmiş volume'ler
+volumes:
+  shared_storage:
+
+# Servislerin birbirini bulabilmesi için özel bir ağ
+networks:
+  videorag_net:
+    driver: bridge

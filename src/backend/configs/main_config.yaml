@@ -1,0 +1,78 @@
+# videorag_project/configs/main_config.yaml
+
+# --- Model Configuration ---
+# Specifies which models to use for each task, as defined in the paper.
+models:
+  # Device for local models ('cuda', 'cpu', 'mps'). GPU is required for production performance.
+  device: "cuda" 
+  
+  # ASR Model (Audio-to-Text)
+  azure_whisper:
+    deployment_name: "whisper"
+    language: "en"
+    response_format: "text"
+    temperature: 0.0 
+  
+  # VLM Model (Vision-Language)
+  vlm: "vlm-MiniCPM-V-2_6_modal-VideoRAG_v1" # Or the specific MiniCPM version used
+  
+  # Multi-Modal Encoder (for visual retrieval)
+  multimodal_encoder: "facebookresearch/ImageBind"
+  
+  # Text Encoder (for graph entity embeddings and textual retrieval)
+  text_encoder: "text-embedding-3-small"
+  
+  # LLMs (via OpenAI API)
+  llm_indexer: "gpt-4o-mini" # For cheaper, faster tasks like entity extraction, query reformulation
+  llm_generator: "gpt-4o-attention-project" # For high-quality final answer synthesis
+
+# --- Indexing Pipeline Configuration ---
+# Parameters that control the offline indexing process.
+indexing:
+  # Duration of each video clip in seconds.
+  clip_duration_seconds: 30
+  
+  # Number of frames sampled for the initial VLM captioning (k).
+  initial_vlm_frames_k: 5
+  
+  # Number of frames sampled for the query-aware VLM re-captioning (k'). Must be > k.
+  query_aware_vlm_frames_k_prime: 15
+  
+  # Number of consecutive clips to combine into a single text chunk for KG extraction.
+  chunk_size_in_clips: 3
+
+# --- Retrieval Pipeline Configuration ---
+# Parameters that control the online retrieval process.
+retrieval:
+  # Number of top results to fetch from visual vector search.
+  visual_top_k: 10
+  
+  # Number of top seed entities to fetch from graph vector search.
+  graph_top_k_entities: 5
+
+# --- Storage Configuration ---
+# Defines names for database collections and other storage parameters.
+storage:
+  vector_collections:
+    clips:
+      name: "video_clips"
+      dimension: 1024 # Dimension for ImageBind embeddings
+    chunks:
+      name: "text_chunks"
+      dimension: 1536 # Dimension for OpenAI text-embedding-3-small
+  
+  metadata_collection:
+    name: "ClusterVideoRAG"
+
+# --- Paths Configuration ---
+# Defines paths for file-based operations. Must be accessible by all workers/containers.
+paths:
+  # Directory where segmented clips, frames, etc., are temporarily stored.
+  # In a containerized setup, this should point to a mounted volume.
+  processing_output_dir: "/app/shared_storage/processing"
+  
+  # Specific subdirectory for temporary frames.
+  temp_frame_dir: "/app/shared_storage/temp_frames"
+  
+  # The root directory where final clip files are stored for access by the API.
+  shared_clip_storage: "/app/shared_storage/final_clips"

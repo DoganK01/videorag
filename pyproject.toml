@@ -1,0 +1,59 @@
+[project]
+name = "app"
+version = "0.1.0"
+description = "Retrieval-Augmented Generation with Extreme Long-Context Videos"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "async-lru>=2.0.5",
+    "fastapi>=0.116.0",
+    "gunicorn>=23.0.0",
+    "librosa>=0.11.0",
+    "motor>=3.7.1",
+    "moviepy>=2.2.1",
+    "neo4j>=5.28.1",
+    "numpy>=2.2.6",
+    "openai>=1.93.1",
+    "pillow>=11.3.0",
+    "pymilvus>=2.5.12",
+    "python-dotenv>=1.1.1",
+    "python-json-logger>=3.3.0",
+    "pyyaml>=6.0.2",
+    "redis>=6.2.0",
+    "soundfile>=0.13.1",
+    "torch>=2.7.1",
+    "torchaudio>=2.7.1",
+    "torchvision>=0.22.1",
+    "transformers>=4.53.1",
+    "uvicorn>=0.35.0",
+]
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28.1",
+    "pytest>=8.4.1",
+    "pytest-asyncio>=1.0.0",
+    "pytest-docker>=3.2.3",
+    "ruff>=0.12.2",
+    "ipykernel>=6.29.5",
+    "ipywidgets>=8.1.5"
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/app"]
+
+[tool.mypy]
+plugins = ["pydantic.mypy"]
+
+[tool.ruff] 
+line-length=80
+
+
+type = [
+    "mypy>=1.14.1",
+]
+
